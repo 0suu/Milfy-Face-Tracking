@@ -2,6 +2,8 @@
 
 Milfy v1.5.0 向けの VRChat フェイストラッキング設定パッケージです。
 
+[VPM パッケージ一覧](https://suu31.net/vpm/)
+
 ## 前提
 
 - 未改変の Milfy v1.5.0
