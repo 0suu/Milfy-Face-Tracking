@@ -731,7 +731,7 @@ namespace Suu.MilfyFT.Editor
             mergeAnimator.deleteAttachedAnimator = false;
             mergeAnimator.pathMode = MergeAnimatorPathMode.Absolute;
             mergeAnimator.matchAvatarWriteDefaults = false;
-            mergeAnimator.layerPriority = 11;
+            mergeAnimator.layerPriority = 900;
             mergeAnimator.mergeAnimatorMode = MergeAnimatorMode.Append;
             EditorUtility.SetDirty(mergeAnimator);
 

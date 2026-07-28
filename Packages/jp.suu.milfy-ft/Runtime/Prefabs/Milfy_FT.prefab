@@ -275,7 +275,7 @@ MonoBehaviour:
   relativePathRoot:
     referencePath: 
     targetObject: {fileID: 0}
-  layerPriority: 10
+  layerPriority: 1000
   mergeAnimatorMode: 0
 --- !u!1 &1854810627047414708
 GameObject:
@@ -460,7 +460,7 @@ MonoBehaviour:
   relativePathRoot:
     referencePath: 
     targetObject: {fileID: 0}
-  layerPriority: 0
+  layerPriority: 1000
   mergeAnimatorMode: 0
 --- !u!114 &8197226919085020531
 MonoBehaviour:
