@@ -1,0 +1,19 @@
+{
+  "name": "Suu.MilfyFT.Editor",
+  "rootNamespace": "Suu.MilfyFT.Editor",
+  "references": [
+    "GUID:36c306fbfd17b8a4a8443f67f3991996",
+    "GUID:fc900867c0f47cd49b6e2ae4ef907300"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

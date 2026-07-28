@@ -1,0 +1,23 @@
+{
+  "name": "jp.suu.milfy-ft",
+  "displayName": "Milfy Face Tracking",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "description": "Face tracking setup for the unmodified Milfy avatar using Unified Expressions blendshapes.",
+  "author": {
+    "name": "suu"
+  },
+  "license": "MIT",
+  "keywords": [
+    "vrchat",
+    "face-tracking",
+    "milfy",
+    "modular-avatar"
+  ],
+  "vpmDependencies": {
+    "com.vrchat.avatars": ">=3.8.2 <4.0.0-a",
+    "nadena.dev.modular-avatar": ">=1.13.4 <2.0.0-a",
+    "com.triturbo.blendshare": ">=1.0.3 <2.0.0-a",
+    "adjerry91.vrcft.templates": "7.0.5"
+  }
+}
