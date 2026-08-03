@@ -151,7 +151,7 @@ MonoBehaviour:
       name: 
     value: 1
     style: 0
-    subMenu: {fileID: 11400000, guid: c67a7350f97168241bcae8a4127f4393, type: 2}
+    subMenu: {fileID: 11400000, guid: 2f576ffaf82443ec9e11636a04d4eb93, type: 2}
     subParameters: []
     labels: []
   MenuSource: 0
@@ -496,11 +496,11 @@ MonoBehaviour:
       name: 
     value: 1
     style: 0
-    subMenu: {fileID: 11400000, guid: 36335ab195d33f84199a79cd56e6a010, type: 2}
+    subMenu: {fileID: 0}
     subParameters: []
     labels: []
-  MenuSource: 0
-  menuSource_otherObjectChildren: {fileID: 0}
+  MenuSource: 1
+  menuSource_otherObjectChildren: {fileID: 246554693512035477}
   isSynced: 1
   isSaved: 1
   isDefault: 0
@@ -590,7 +590,7 @@ MonoBehaviour:
     hasExplicitDefaultValue: 0
     m_overrideAnimatorDefaults: 0
   - nameOrPrefix: FT/EyeSync
-    remapTo: 
+    remapTo: Milfy/GazeSync
     internalParameter: 0
     isPrefix: 0
     syncType: 3
@@ -598,6 +598,26 @@ MonoBehaviour:
     defaultValue: 0
     saved: 1
     hasExplicitDefaultValue: 0
+    m_overrideAnimatorDefaults: 0
+  - nameOrPrefix: Milfy/BlinkSync
+    remapTo:
+    internalParameter: 0
+    isPrefix: 0
+    syncType: 3
+    localOnly: 0
+    defaultValue: 0
+    saved: 1
+    hasExplicitDefaultValue: 1
+    m_overrideAnimatorDefaults: 0
+  - nameOrPrefix: Milfy/NareEyeSmile
+    remapTo:
+    internalParameter: 0
+    isPrefix: 0
+    syncType: 3
+    localOnly: 0
+    defaultValue: 0
+    saved: 1
+    hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
   - nameOrPrefix: RemoteModeActive
     remapTo: 
