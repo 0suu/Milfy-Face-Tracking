@@ -275,7 +275,7 @@ MonoBehaviour:
   relativePathRoot:
     referencePath: 
     targetObject: {fileID: 0}
-  layerPriority: 1000
+  layerPriority: 1100
   mergeAnimatorMode: 0
 --- !u!1 &1854810627047414708
 GameObject:
@@ -609,7 +609,7 @@ MonoBehaviour:
     saved: 1
     hasExplicitDefaultValue: 1
     m_overrideAnimatorDefaults: 0
-  - nameOrPrefix: Milfy/NareEyeSmile
+  - nameOrPrefix: Milfy/EyeSmileCorrection
     remapTo:
     internalParameter: 0
     isPrefix: 0

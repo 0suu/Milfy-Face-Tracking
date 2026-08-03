@@ -88,11 +88,11 @@ MonoBehaviour:
     subMenu: {fileID: 0}
     subParameters: []
     labels: []
-  - name: NARE Eye Smile Correction
+  - name: Eye Smile Correction
     icon: {fileID: 2800000, guid: 64e82e07babc45d48af1a0e844d075f3, type: 3}
     type: 102
     parameter:
-      name: Milfy/NareEyeSmile
+      name: Milfy/EyeSmileCorrection
     value: 1
     style: 0
     subMenu: {fileID: 0}
