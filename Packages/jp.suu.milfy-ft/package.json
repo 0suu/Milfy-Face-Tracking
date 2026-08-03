@@ -1,7 +1,7 @@
 {
   "name": "jp.suu.milfy-ft",
   "displayName": "Milfy Face Tracking",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "unity": "2022.3",
   "description": "Face tracking setup for the unmodified Milfy avatar using Unified Expressions blendshapes.",
   "author": {

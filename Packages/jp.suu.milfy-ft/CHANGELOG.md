@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.1.0 - 2026-08-03
+
+- `mouth_Λ = 70`、`mouth_narrow = 45` を標準の既定口として判定し、標準Milfyだけで口補償を選択できるよう変更
+- 口補償を明示的に無効化した場合は、補償用アセットとModular Avatarコンポーネントを生成しないよう変更
+- `Viseme` を優先する3状態の補償Controllerへ変更し、音声リップシンクとの競合を修正
+- 1引数の `MilfyFtSetupService.Setup` を非推奨化し、口補償の有無を明示する2引数版を推奨
+
 ## 1.0.0 - 2026-07-28
 
 - Milfy 専用の `Milfy_FT.prefab` を追加

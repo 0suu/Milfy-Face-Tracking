@@ -28,7 +28,9 @@ Jerry's Templates は互換性を保証するため 7.0.5 に固定していま�
 
 元のGameObjectとFBXは変更されません。Hierarchy上に `_FT` 付きの複製を作り、`Assets/suu_MilfyFT/Generated` にFT用Meshアセットを生成して複製側の `Body` だけへ割り当てます。複製側には `Milfy_FT.prefab` も自動で追加されます。
 
-セットアップ画面の `口開き時に既定口を相殺` は初期状態で有効です。セットアップ時のMilfyから、非ゼロの `mouth_*` BlendShapeを取得し、`wide` と `narrow` を除いて、JawOpenの値に比例して0へ補間します。補正はLip Tracking中に口が開いた時だけ有効になり、新しいExpression Parameterや同期bitは追加しません。
+セットアップ画面の `口を開いたときにMilfyの既定口を弱める` は、標準の既定口（`mouth_Λ = 70`、`mouth_narrow = 45`）を検出した場合だけ使用でき、初期状態で有効になります。不要な場合はオフにできます。既定の `mouth_*` がない場合やカスタム口を検出した場合は、音声リップシンクとの正しい併用を保証できないため使用できません。
+
+有効時は、非ゼロの `mouth_*` BlendShapeを取得し、`wide` と `narrow` を除いてJawOpenに比例して0へ補間します。`Visemes Enabled` がオンの音声リップシンク中は `Viseme` を優先して既定口を0にするため、Face Tracking側の補償で通常のリップシンクが上書きされません。無効時は補償用Controller、AnimationClip、Modular Avatarコンポーネントを生成しません。新しいExpression Parameterや同期bitも追加しません。
 
 手動導入する場合も、BlendShareの `Create Meshes` で別Meshアセットを生成し、複製したMilfyへ割り当ててください。`Apply BlendShapes` は元のFBXを直接更新するため、原本を残す運用では使用しないでください。
 

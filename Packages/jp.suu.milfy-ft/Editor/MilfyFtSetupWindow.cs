@@ -16,7 +16,9 @@ namespace Suu.MilfyFT.Editor
     internal sealed class MilfyFtSetupWindow : EditorWindow
     {
         private GameObject _sourceAvatar;
-        private bool _enableMouthDefaultCompensation = true;
+        private GameObject _analyzedAvatar;
+        private bool _enableMouthDefaultCompensation;
+        private MouthDefaultAnalysis _mouthDefaultAnalysis;
         private Vector2 _scrollPosition;
 
         [MenuItem("Tools/suu_MifyFT/setup")]
@@ -46,23 +48,54 @@ namespace Suu.MilfyFT.Editor
                 MessageType.Info);
 
             EditorGUILayout.Space(8f);
+            EditorGUI.BeginChangeCheck();
             _sourceAvatar = EditorGUILayout.ObjectField(
                 new GUIContent("Milfy GameObject", "Project内のPrefabではなく、Hierarchy上のMilfyを指定します。"),
                 _sourceAvatar,
                 typeof(GameObject),
                 true) as GameObject;
+            if (EditorGUI.EndChangeCheck() ||
+                _analyzedAvatar != _sourceAvatar ||
+                _mouthDefaultAnalysis == null)
+            {
+                AnalyzeMouthDefault();
+            }
 
-            _enableMouthDefaultCompensation = EditorGUILayout.ToggleLeft(
-                new GUIContent(
-                    "口開き時に既定口を相殺",
-                    "現在のMilfyで非ゼロのmouth_* BlendShapeを取得し、wide/narrowを除いてJawOpenに比例して0へ補間します。"),
-                _enableMouthDefaultCompensation);
+            using (new EditorGUI.DisabledScope(
+                       _mouthDefaultAnalysis == null ||
+                       !_mouthDefaultAnalysis.Recommended))
+            {
+                _enableMouthDefaultCompensation = EditorGUILayout.ToggleLeft(
+                    new GUIContent(
+                        "口を開いたときにMilfyの既定口を弱める",
+                        "標準Milfyの既定口（mouth_Λ = 70、mouth_narrow = 45）向けです。カスタム口では音声リップシンクとの正しい併用を保証できないため使用できません。"),
+                    _enableMouthDefaultCompensation);
+            }
+
+            if (_mouthDefaultAnalysis != null)
+            {
+                EditorGUILayout.HelpBox(
+                    _mouthDefaultAnalysis.Message,
+                    _mouthDefaultAnalysis.Recommended
+                        ? MessageType.Info
+                        : MessageType.Warning);
+            }
 
             EditorGUILayout.Space(8f);
 
             bool isValid = MilfyFtSetupService.TryValidate(
                 _sourceAvatar,
                 out string validationMessage);
+
+            if (isValid &&
+                _enableMouthDefaultCompensation &&
+                (_mouthDefaultAnalysis == null ||
+                 _mouthDefaultAnalysis.CompensationTargetCount == 0))
+            {
+                isValid = false;
+                validationMessage =
+                    "既定口を弱める対象が見つかりません。この設定をオフにしてください。";
+            }
 
             EditorGUILayout.HelpBox(
                 validationMessage,
@@ -76,7 +109,7 @@ namespace Suu.MilfyFT.Editor
             EditorGUILayout.LabelField("4. 複製側へMilfy_FT.prefabを追加");
             if (_enableMouthDefaultCompensation)
             {
-                EditorGUILayout.LabelField("5. 現在の既定口をJawOpenに合わせて相殺");
+                EditorGUILayout.LabelField("5. FTと音声リップシンクを判定して既定口を相殺");
             }
 
             EditorGUILayout.Space(12f);
@@ -149,6 +182,15 @@ namespace Suu.MilfyFT.Editor
                     "OK");
             }
         }
+
+        private void AnalyzeMouthDefault()
+        {
+            _analyzedAvatar = _sourceAvatar;
+            _mouthDefaultAnalysis =
+                MilfyFtSetupService.AnalyzeMouthDefault(_sourceAvatar);
+            _enableMouthDefaultCompensation =
+                _mouthDefaultAnalysis.Recommended;
+        }
     }
 
     public sealed class MilfyFtSetupResult
@@ -190,6 +232,109 @@ namespace Suu.MilfyFT.Editor
             "OSCm/Proxy/FT/v2/JawOpen";
 
         private const string LipTrackingParameterName = "LipTrackingActive";
+
+        private const string VisemeParameterName = "Viseme";
+
+        private const string VisemesEnabledParameterName = "VisemesEnable";
+
+        private const string PassThroughParameterName =
+            "__SuuMilfyFT/MouthPassThrough";
+
+        // Milfy v1.5.0の未改変Bodyで確認した既定値。
+        private const float DefaultMouthLambdaValue = 70f;
+
+        private const float DefaultMouthNarrowValue = 45f;
+
+        private const float DefaultMouthValueTolerance = 0.1f;
+
+        private const float JawOpenActivationThreshold = 0.001f;
+
+        private const float JawOpenDeactivationThreshold = 0.0005f;
+
+        private const float LipTrackingActivationThreshold = 0.5f;
+
+        private const float LipTrackingDeactivationThreshold = 0.25f;
+
+        internal static MouthDefaultAnalysis AnalyzeMouthDefault(
+            GameObject avatar)
+        {
+            if (avatar == null ||
+                !TryGetSingleBodyRenderer(
+                    avatar,
+                    out SkinnedMeshRenderer renderer,
+                    out _))
+            {
+                return MouthDefaultAnalysis.Unavailable();
+            }
+
+            Mesh mesh = renderer.sharedMesh;
+            if (mesh == null)
+            {
+                return MouthDefaultAnalysis.Unavailable();
+            }
+
+            var nonZeroMouthShapes = new List<MouthShapeValue>();
+            int compensationTargetCount = 0;
+
+            for (int index = 0; index < mesh.blendShapeCount; index++)
+            {
+                string blendShapeName = mesh.GetBlendShapeName(index);
+                if (!IsMouthShape(blendShapeName))
+                {
+                    continue;
+                }
+
+                float value = renderer.GetBlendShapeWeight(index);
+                if (!IsNonZeroMouthDefaultValue(value))
+                {
+                    continue;
+                }
+
+                nonZeroMouthShapes.Add(
+                    new MouthShapeValue(blendShapeName, value));
+                if (IsMouthDefaultCompensationTarget(blendShapeName))
+                {
+                    compensationTargetCount++;
+                }
+            }
+
+            bool isStockDefault =
+                nonZeroMouthShapes.Count == 2 &&
+                HasMouthShapeValue(
+                    nonZeroMouthShapes,
+                    "mouth_Λ",
+                    DefaultMouthLambdaValue) &&
+                HasMouthShapeValue(
+                    nonZeroMouthShapes,
+                    "mouth_narrow",
+                    DefaultMouthNarrowValue);
+
+            if (isStockDefault)
+            {
+                return new MouthDefaultAnalysis(
+                    true,
+                    compensationTargetCount,
+                    "標準Milfyの既定口（mouth_Λ = 70、mouth_narrow = 45）を検出しました。この設定を推奨します。音声リップシンク中はVisemeを優先します。");
+            }
+
+            if (nonZeroMouthShapes.Count == 0)
+            {
+                return new MouthDefaultAnalysis(
+                    false,
+                    0,
+                    "既定のmouth_*変形はありません。この設定は不要です。補償レイヤーも生成しません。");
+            }
+
+            string detected = string.Join(
+                ", ",
+                nonZeroMouthShapes.Select(shape =>
+                    $"{shape.Name}={shape.Value:0.###}"));
+            return new MouthDefaultAnalysis(
+                false,
+                compensationTargetCount,
+                "カスタムされた既定口を検出しました。音声リップシンクとの正しい併用を保証できないため、この設定は使用できません。\n検出: " +
+                detected);
+        }
 
         public static bool TryValidate(GameObject sourceAvatar, out string message)
         {
@@ -298,9 +443,18 @@ namespace Suu.MilfyFT.Editor
             return true;
         }
 
+        [Obsolete(
+            "口の既定変形を補償するか明示してください。Setup(sourceAvatar, enableMouthDefaultCompensation) を使用してください。")]
+        public static MilfyFtSetupResult Setup(GameObject sourceAvatar)
+        {
+            return Setup(
+                sourceAvatar,
+                AnalyzeMouthDefault(sourceAvatar).Recommended);
+        }
+
         public static MilfyFtSetupResult Setup(
             GameObject sourceAvatar,
-            bool enableMouthDefaultCompensation = true)
+            bool enableMouthDefaultCompensation)
         {
             if (!TryValidate(sourceAvatar, out string validationMessage))
             {
@@ -338,6 +492,14 @@ namespace Suu.MilfyFT.Editor
                 enableMouthDefaultCompensation
                     ? CollectMouthDefaultTargets(sourceAvatar)
                     : null;
+
+            if (enableMouthDefaultCompensation &&
+                !AnalyzeMouthDefault(sourceAvatar).Recommended)
+            {
+                throw new InvalidOperationException(
+                    "既定口の相殺は標準Milfyの既定口（mouth_Λ = 70、mouth_narrow = 45）だけで使用できます。" +
+                    "カスタム口や既定口なしの場合は、このオプションをオフにしてください。");
+            }
 
             if (enableMouthDefaultCompensation &&
                 mouthDefaultTargets.Count == 0)
@@ -665,7 +827,7 @@ namespace Suu.MilfyFT.Editor
                 }
 
                 float defaultValue = renderer.GetBlendShapeWeight(index);
-                if (Mathf.Approximately(defaultValue, 0f))
+                if (!IsNonZeroMouthDefaultValue(defaultValue))
                 {
                     continue;
                 }
@@ -682,15 +844,39 @@ namespace Suu.MilfyFT.Editor
         private static bool IsMouthDefaultCompensationTarget(
             string blendShapeName)
         {
-            return blendShapeName.StartsWith(
-                       "mouth_",
-                       StringComparison.OrdinalIgnoreCase) &&
+            return IsMouthShape(blendShapeName) &&
                    blendShapeName.IndexOf(
                        "wide",
                        StringComparison.OrdinalIgnoreCase) < 0 &&
                    blendShapeName.IndexOf(
                        "narrow",
                        StringComparison.OrdinalIgnoreCase) < 0;
+        }
+
+        private static bool IsMouthShape(string blendShapeName)
+        {
+            return blendShapeName.StartsWith(
+                "mouth_",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsNonZeroMouthDefaultValue(float value)
+        {
+            return Mathf.Abs(value) > DefaultMouthValueTolerance;
+        }
+
+        private static bool HasMouthShapeValue(
+            IEnumerable<MouthShapeValue> shapes,
+            string expectedName,
+            float expectedValue)
+        {
+            return shapes.Any(shape =>
+                string.Equals(
+                    shape.Name,
+                    expectedName,
+                    StringComparison.OrdinalIgnoreCase) &&
+                Mathf.Abs(shape.Value - expectedValue) <=
+                DefaultMouthValueTolerance);
         }
 
         private static MouthDefaultCompensationResult
@@ -704,11 +890,14 @@ namespace Suu.MilfyFT.Editor
                 $"{GeneratedRootFolder}/{fileNamePrefix}_MouthDefault.anim");
             string cancelClipPath = AssetDatabase.GenerateUniqueAssetPath(
                 $"{GeneratedRootFolder}/{fileNamePrefix}_MouthCancel.anim");
+            string passThroughClipPath = AssetDatabase.GenerateUniqueAssetPath(
+                $"{GeneratedRootFolder}/{fileNamePrefix}_MouthPassThrough.anim");
             string controllerPath = AssetDatabase.GenerateUniqueAssetPath(
                 $"{GeneratedRootFolder}/{fileNamePrefix}_MouthCompensation.controller");
 
             generatedAssetPaths.Add(defaultClipPath);
             generatedAssetPaths.Add(cancelClipPath);
+            generatedAssetPaths.Add(passThroughClipPath);
             generatedAssetPaths.Add(controllerPath);
 
             AnimationClip defaultClip = CreateMouthDefaultClip(
@@ -719,10 +908,13 @@ namespace Suu.MilfyFT.Editor
                 cancelClipPath,
                 targets,
                 true);
+            AnimationClip passThroughClip = CreatePassThroughClip(
+                passThroughClipPath);
             AnimatorController controller = CreateMouthDefaultController(
                 controllerPath,
                 defaultClip,
-                cancelClip);
+                cancelClip,
+                passThroughClip);
 
             var mergeAnimator = Undo.AddComponent<ModularAvatarMergeAnimator>(
                 avatarClone);
@@ -770,10 +962,30 @@ namespace Suu.MilfyFT.Editor
             return clip;
         }
 
+        private static AnimationClip CreatePassThroughClip(string assetPath)
+        {
+            var clip = new AnimationClip
+            {
+                name = Path.GetFileNameWithoutExtension(assetPath),
+                frameRate = 60f,
+            };
+            var binding = EditorCurveBinding.FloatCurve(
+                string.Empty,
+                typeof(Animator),
+                PassThroughParameterName);
+            AnimationUtility.SetEditorCurve(
+                clip,
+                binding,
+                AnimationCurve.Constant(0f, 1f / 60f, 0f));
+            AssetDatabase.CreateAsset(clip, assetPath);
+            return clip;
+        }
+
         private static AnimatorController CreateMouthDefaultController(
             string controllerPath,
             AnimationClip defaultClip,
-            AnimationClip cancelClip)
+            AnimationClip cancelClip,
+            AnimationClip passThroughClip)
         {
             AnimatorController controller =
                 AnimatorController.CreateAnimatorControllerAtPath(controllerPath);
@@ -782,6 +994,18 @@ namespace Suu.MilfyFT.Editor
                 AnimatorControllerParameterType.Float);
             controller.AddParameter(
                 LipTrackingParameterName,
+                AnimatorControllerParameterType.Float);
+            controller.AddParameter(
+                VisemeParameterName,
+                AnimatorControllerParameterType.Int);
+            controller.AddParameter(new AnimatorControllerParameter
+            {
+                name = VisemesEnabledParameterName,
+                type = AnimatorControllerParameterType.Bool,
+                defaultBool = true,
+            });
+            controller.AddParameter(
+                PassThroughParameterName,
                 AnimatorControllerParameterType.Float);
 
             AnimatorControllerLayer layer = controller.layers[0];
@@ -805,40 +1029,145 @@ namespace Suu.MilfyFT.Editor
             blendTree.AddChild(defaultClip, 0f);
             blendTree.AddChild(cancelClip, 1f);
 
-            AnimatorState offState = stateMachine.AddState("Off", new Vector3(240f, 80f));
-            offState.writeDefaultValues = false;
+            AnimatorState passThroughState = stateMachine.AddState(
+                "Pass Through",
+                new Vector3(240f, 80f));
+            // 元MilfyのLipSyncControllerが非発話時に既定値を復元するため、
+            // この状態ではmouth_*を書かず、元のFXレイヤーへ制御を返す。
+            passThroughState.motion = passThroughClip;
+            passThroughState.writeDefaultValues = false;
 
             AnimatorState activeState = stateMachine.AddState(
-                "Cancel default mouth by JawOpen",
+                "Face Tracking Compensation",
                 new Vector3(240f, 220f));
             activeState.motion = blendTree;
             activeState.writeDefaultValues = false;
-            stateMachine.defaultState = offState;
+
+            AnimatorState speechState = stateMachine.AddState(
+                "Speech Cancel",
+                new Vector3(520f, 80f));
+            speechState.motion = cancelClip;
+            speechState.writeDefaultValues = false;
+            stateMachine.defaultState = passThroughState;
 
             AnimatorStateTransition activate =
-                AddImmediateTransition(offState, activeState);
+                AddImmediateTransition(passThroughState, activeState);
+            activate.AddCondition(
+                AnimatorConditionMode.If,
+                0f,
+                VisemesEnabledParameterName);
+            activate.AddCondition(
+                AnimatorConditionMode.Equals,
+                0f,
+                VisemeParameterName);
             activate.AddCondition(
                 AnimatorConditionMode.Greater,
-                0.5f,
+                LipTrackingActivationThreshold,
                 LipTrackingParameterName);
             activate.AddCondition(
                 AnimatorConditionMode.Greater,
-                0.001f,
+                JawOpenActivationThreshold,
                 JawOpenParameterName);
 
+            AnimatorStateTransition activateWithVisemesDisabled =
+                AddImmediateTransition(passThroughState, activeState);
+            activateWithVisemesDisabled.AddCondition(
+                AnimatorConditionMode.IfNot,
+                0f,
+                VisemesEnabledParameterName);
+            activateWithVisemesDisabled.AddCondition(
+                AnimatorConditionMode.Greater,
+                LipTrackingActivationThreshold,
+                LipTrackingParameterName);
+            activateWithVisemesDisabled.AddCondition(
+                AnimatorConditionMode.Greater,
+                JawOpenActivationThreshold,
+                JawOpenParameterName);
+
+            AnimatorStateTransition speechFromPassThrough =
+                AddImmediateTransition(passThroughState, speechState);
+            speechFromPassThrough.AddCondition(
+                AnimatorConditionMode.If,
+                0f,
+                VisemesEnabledParameterName);
+            speechFromPassThrough.AddCondition(
+                AnimatorConditionMode.NotEqual,
+                0f,
+                VisemeParameterName);
+
+            // Speechを先に追加し、同時成立時も音声キャンセルを優先する。
+            AnimatorStateTransition speechFromFaceTracking =
+                AddImmediateTransition(activeState, speechState);
+            speechFromFaceTracking.AddCondition(
+                AnimatorConditionMode.If,
+                0f,
+                VisemesEnabledParameterName);
+            speechFromFaceTracking.AddCondition(
+                AnimatorConditionMode.NotEqual,
+                0f,
+                VisemeParameterName);
+
             AnimatorStateTransition deactivateByJaw =
-                AddImmediateTransition(activeState, offState);
+                AddImmediateTransition(activeState, passThroughState);
             deactivateByJaw.AddCondition(
                 AnimatorConditionMode.Less,
-                0.001f,
+                JawOpenDeactivationThreshold,
                 JawOpenParameterName);
 
             AnimatorStateTransition deactivateByTracking =
-                AddImmediateTransition(activeState, offState);
+                AddImmediateTransition(activeState, passThroughState);
             deactivateByTracking.AddCondition(
                 AnimatorConditionMode.Less,
-                0.5f,
+                LipTrackingDeactivationThreshold,
                 LipTrackingParameterName);
+
+            AnimatorStateTransition resumeFaceTracking =
+                AddImmediateTransition(speechState, activeState);
+            resumeFaceTracking.AddCondition(
+                AnimatorConditionMode.If,
+                0f,
+                VisemesEnabledParameterName);
+            resumeFaceTracking.AddCondition(
+                AnimatorConditionMode.Equals,
+                0f,
+                VisemeParameterName);
+            resumeFaceTracking.AddCondition(
+                AnimatorConditionMode.Greater,
+                LipTrackingActivationThreshold,
+                LipTrackingParameterName);
+            resumeFaceTracking.AddCondition(
+                AnimatorConditionMode.Greater,
+                JawOpenActivationThreshold,
+                JawOpenParameterName);
+
+            AnimatorStateTransition resumeFaceTrackingWithVisemesDisabled =
+                AddImmediateTransition(speechState, activeState);
+            resumeFaceTrackingWithVisemesDisabled.AddCondition(
+                AnimatorConditionMode.IfNot,
+                0f,
+                VisemesEnabledParameterName);
+            resumeFaceTrackingWithVisemesDisabled.AddCondition(
+                AnimatorConditionMode.Greater,
+                LipTrackingActivationThreshold,
+                LipTrackingParameterName);
+            resumeFaceTrackingWithVisemesDisabled.AddCondition(
+                AnimatorConditionMode.Greater,
+                JawOpenActivationThreshold,
+                JawOpenParameterName);
+
+            AnimatorStateTransition speechFinished =
+                AddImmediateTransition(speechState, passThroughState);
+            speechFinished.AddCondition(
+                AnimatorConditionMode.Equals,
+                0f,
+                VisemeParameterName);
+
+            AnimatorStateTransition speechDisabled =
+                AddImmediateTransition(speechState, passThroughState);
+            speechDisabled.AddCondition(
+                AnimatorConditionMode.IfNot,
+                0f,
+                VisemesEnabledParameterName);
 
             controller.layers = new[] { layer };
             EditorUtility.SetDirty(controller);
@@ -1009,6 +1338,18 @@ namespace Suu.MilfyFT.Editor
             }
         }
 
+        private sealed class MouthShapeValue
+        {
+            public string Name { get; }
+            public float Value { get; }
+
+            public MouthShapeValue(string name, float value)
+            {
+                Name = name;
+                Value = value;
+            }
+        }
+
         private sealed class MouthDefaultCompensationResult
         {
             public string ControllerPath { get; }
@@ -1021,6 +1362,31 @@ namespace Suu.MilfyFT.Editor
                 ControllerPath = controllerPath;
                 BlendShapeCount = blendShapeCount;
             }
+        }
+    }
+
+    internal sealed class MouthDefaultAnalysis
+    {
+        public bool Recommended { get; }
+        public int CompensationTargetCount { get; }
+        public string Message { get; }
+
+        internal MouthDefaultAnalysis(
+            bool recommended,
+            int compensationTargetCount,
+            string message)
+        {
+            Recommended = recommended;
+            CompensationTargetCount = compensationTargetCount;
+            Message = message;
+        }
+
+        internal static MouthDefaultAnalysis Unavailable()
+        {
+            return new MouthDefaultAnalysis(
+                false,
+                0,
+                "Milfyを指定すると、現在の既定口を確認して推奨設定を表示します。");
         }
     }
 }
