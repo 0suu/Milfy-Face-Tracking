@@ -51,7 +51,15 @@ Jerry's Templates 7.0.5が標準では直接出力しない次の形状は、`Mi
 
 Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLowerDownLeft` と `MouthLowerDownRight` は同じ値で動きます。左右を独立させるにはFT構成全体の変更が必要です。
 
-この補正レイヤーが書き込むのは上記6形状だけです。Milfyに元からある `BrowInnerUp` などのBlendShapeは変更・固定しません。既存表情とFT表情の競合や合成は、このパッケージより上位の表情制御レイヤーで調整してください。
+`Milfy FT Shape Adapter` レイヤーが書き込むのは上記6形状だけです。Milfyに元からある `BrowInnerUp` などのBlendShapeは変更・固定しません。既存表情とFT表情の競合や合成は、このパッケージより上位の表情制御レイヤーで調整してください。
+
+## 設定メニュー
+
+- `Gaze Sync`: 左右の視線方向だけを同期します。左右のまぶたは同期しないため、オンのままウィンクできます。
+- `Eye Smile Correction`: 笑顔と閉眼度に応じて `EyeClosedSquintCorrectiveLeft` / `Right` を補正します。初期状態はオフです。Jerry側も同じBlendShapeを使用するため、有効時はJerryの補正を上書きします。使用する場合は笑顔・目細め・瞬きの組み合わせを確認してください。
+- `Debug`: Jerry's Templates 7.0.5のVRCFT Debugメニューを開きます。
+
+まぶたを左右同期する `Blink Sync` はありません。Jerry標準の平滑化済み左右まぶた入力を独立したまま使用します。
 
 ## パラメーター容量
 
@@ -68,7 +76,7 @@ Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLow
 
 これらはJerry's Templates内で、Milfy FTの生成Meshに存在しないBlendShapeだけを駆動する入力です。対応する39形状の同期は維持しています。
 
-Milfy v1.5.0の初期Expression Parameters（99 bits）と合成した場合は **233 / 256 bits** です。対応形状の `TongueOut` は別パラメーターのためリモート同期を維持します。
+Milfy v1.5.0の初期Expression Parameters（99 bits）と合成した場合は **234 / 256 bits** です。対応形状の `TongueOut` は別パラメーターのためリモート同期を維持します。
 
 ## 注意事項
 

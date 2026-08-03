@@ -6,6 +6,12 @@
 - 口補償を明示的に無効化した場合は、補償用アセットとModular Avatarコンポーネントを生成しないよう変更
 - `Viseme` を優先する3状態の補償Controllerへ変更し、音声リップシンクとの競合を修正
 - 1引数の `MilfyFtSetupService.Setup` を非推奨化し、口補償の有無を明示する2引数版を推奨
+- Face TrackingのMerge Animator priorityを1000、口補償を900へ変更
+- `Gaze Sync` を視線方向だけへ適用し、左右のまぶたとウィンクへ影響しないよう変更
+- 不要な `Blink Sync` と旧まぶたProxy出力を削除し、Jerry標準の平滑化済みまぶた出力へ統一
+- オプションの `Eye Smile Correction` と設定トグルを追加
+- Expression MenuからJerry's TemplatesのVRCFT Debugメニューを開けるよう変更
+- Milfy v1.5.0初期構成との合成時のExpression Parameters使用量を234 / 256 bitsへ更新
 
 ## 1.0.0 - 2026-07-28
 
