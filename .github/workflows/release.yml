@@ -84,7 +84,7 @@ jobs:
         id: package_sha
         run: |
           set -euo pipefail
-          sha256="$(sha256sum \"${{ env.zipFile }}\" | cut -d ' ' -f1)"
+          sha256="$(sha256sum -- "${{ env.zipFile }}" | cut -d ' ' -f1)"
           echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
           echo "ZIP_SHA256=${sha256}" >> "$GITHUB_ENV"
       
