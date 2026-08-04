@@ -57,6 +57,10 @@ jobs:
       - name: Create Package Zip
         working-directory: "${{ env.packagePath }}"
         run: zip -r "${{ github.workspace }}/${{ env.zipFile }}" .
+
+      # Calculate the checksum that will be published to the VPM repository.
+      - name: Compute Package SHA-256
+        run: echo "zipSha256=$(sha256sum \"${{ env.zipFile }}\" | cut -d ' ' -f1)" >> "$GITHUB_ENV"
       
       # Build a list of .meta files for future use
       - name: Track Package Meta Files
@@ -85,3 +89,31 @@ jobs:
             ${{ env.unityPackage }}
             ${{ env.packagePath }}/package.json
           tag_name: ${{ env.version }}
+
+      # Ask the suu-home repository to update its VPM index. The receiving
+      # workflow verifies the release zip and commits only the VPM metadata.
+      - name: Dispatch VPM update
+        env:
+          DISPATCH_TOKEN: ${{ secrets.SUU_HOME_DISPATCH_TOKEN }}
+          VERSION: ${{ env.version }}
+          ZIP_FILE: ${{ env.zipFile }}
+          ZIP_SHA256: ${{ env.zipSha256 }}
+          PACKAGE_NAME: ${{ vars.PACKAGE_NAME }}
+        run: |
+          set -euo pipefail
+          test -n "${DISPATCH_TOKEN}"
+          release_url="https://github.com/${{ github.repository }}/releases/download/${VERSION}/${ZIP_FILE}"
+          payload="$(jq -n \
+            --arg package_name "${PACKAGE_NAME}" \
+            --arg version "${VERSION}" \
+            --arg release_url "${release_url}" \
+            --arg zip_sha256 "${ZIP_SHA256}" \
+            '{event_type:"milfy-face-tracking-release",client_payload:{package_name:$package_name,version:$version,release_url:$release_url,zip_sha256:$zip_sha256}}')"
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${DISPATCH_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/0suu/suu-home/dispatches \
+            -d "${payload}"
