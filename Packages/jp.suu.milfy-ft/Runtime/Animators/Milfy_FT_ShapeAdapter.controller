@@ -818,7 +818,7 @@ BlendTree:
   m_Name: Eye Smile Correction Left Closure Gate
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: a9c1e3f7c0d14e7aa5b34d6f2a8f91b0, type: 2}
+    m_Motion: {fileID: 7400000, guid: b4e8a2d913cf4e7aa1d5f9c762e0b8a6, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -888,7 +888,7 @@ BlendTree:
   m_Name: Eye Smile Correction Right Closure Gate
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: a9c1e3f7c0d14e7aa5b34d6f2a8f91b0, type: 2}
+    m_Motion: {fileID: 7400000, guid: c7f5d0e6a2b14c99b8e3741fa6d2c501, type: 2}
     m_Threshold: 0
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
