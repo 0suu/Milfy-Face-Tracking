@@ -81,7 +81,12 @@ jobs:
 
       # Calculate the checksum that will be published to the VPM repository.
       - name: Compute Package SHA-256
-        run: echo "zipSha256=$(sha256sum \"${{ env.zipFile }}\" | cut -d ' ' -f1)" >> "$GITHUB_ENV"
+        id: package_sha
+        run: |
+          set -euo pipefail
+          sha256="$(sha256sum \"${{ env.zipFile }}\" | cut -d ' ' -f1)"
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+          echo "ZIP_SHA256=${sha256}" >> "$GITHUB_ENV"
       
       # Build a list of .meta files for future use
       - name: Track Package Meta Files
@@ -118,7 +123,7 @@ jobs:
           DISPATCH_TOKEN: ${{ secrets.SUU_HOME_DISPATCH_TOKEN }}
           VERSION: ${{ env.version }}
           ZIP_FILE: ${{ env.zipFile }}
-          ZIP_SHA256: ${{ env.zipSha256 }}
+          ZIP_SHA256: ${{ steps.package_sha.outputs.sha256 }}
           PACKAGE_NAME: ${{ vars.PACKAGE_NAME }}
         run: |
           set -euo pipefail
