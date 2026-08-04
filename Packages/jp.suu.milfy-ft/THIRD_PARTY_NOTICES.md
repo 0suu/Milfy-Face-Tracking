@@ -1,5 +1,13 @@
 # Third-Party Notices
 
+## Milfy Original 3D Model
+
+- Model: [Milfy Original 3D Model](https://mk22.booth.pm/c)
+- Rights holder: 有坂みと
+- Credit: `© 有坂みと (@Mito_Arisaka)`
+
+This package does not include the original Milfy FBX, mesh, or textures. It includes Milfy-specific BlendShare data used with the user's compatible Milfy FBX to generate the face-tracking mesh. The Milfy model and this derived data remain subject to the Milfy terms of use.
+
 ## VRCFT - Jerry's Templates
 
 - Project: [Adjerry91/VRCFaceTracking-Templates](https://github.com/ADJERRY91/VRCFACETRACKING-TEMPLATES)
