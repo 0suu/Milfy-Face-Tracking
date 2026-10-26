@@ -1,21 +1,24 @@
-neutral wide=0,0 closed=0,0 proxy=0.75,0.75
-wide25 wide=25,25 closed=0,0 proxy=0.8125,0.8125
-wide50 wide=50,50 closed=0,0 proxy=0.875,0.875
-wide75 wide=75,75 closed=0,0 proxy=0.9375,0.9375
-wide100 wide=100,100 closed=0,0 proxy=1,1
-leftWide wide=100,0 closed=0,0 proxy=1,0.75
-rightWide wide=0,100 closed=0,0 proxy=0.75,1
-leftWink wide=0,0 closed=100,0 proxy=-1.490116E-08,0.75
-rightWink wide=0,0 closed=1.788139E-05,100 proxy=0.7499999,-1.490116E-08
-reopen wide=0,0 closed=1.788139E-05,1.788139E-05 proxy=0.7499999,0.7499999
-palmWide wide=100,100 closed=0,0 proxy=1,1
-palmHalfWide wide=50,50 closed=0,0 proxy=0.875,0.875
-palmClosed wide=0,0 closed=0,0 proxy=-1.490116E-08,-1.490116E-08
-palmReopen wide=0,0 closed=0,0 proxy=0.75,0.75
-questWide wide=100,100 closed=0,0 proxy=1,1
-noFT wide=0,0 closed=0,0 proxy=-1.490116E-08,-1.490116E-08
-frameAgain wide=100,100 closed=0,0 proxy=1,1
-trackingStopped wide=0,0 closed=0,0 proxy=-1.490116E-08,-1.490116E-08
-trackingResumed wide=100,100 closed=0,0 proxy=1,1
-squintWide wide=100,100 closed=0,0 proxy=1,1
-PASS 20 generated Animator cases. SDK parameter/layer behaviours emulated in EditMode. Cost=216
+neutral wide=0,0 pupilCorrection=0,0 closed=0,0 proxy=0.75,0.75
+wide25 wide=25,25 pupilCorrection=25,25 closed=0,0 proxy=0.8125,0.8125
+wide50 wide=50,50 pupilCorrection=50,50 closed=0,0 proxy=0.875,0.875
+wide75 wide=75,75 pupilCorrection=75,75 closed=0,0 proxy=0.9375,0.9375
+wide100 wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+leftWide wide=100,0 pupilCorrection=100,0 closed=0,0 proxy=1,0.75
+rightWide wide=0,100 pupilCorrection=0,100 closed=0,0 proxy=0.75,1
+leftWink wide=0,0 pupilCorrection=0,0 closed=100,0 proxy=-1.490116E-08,0.75
+rightWink wide=0,0 pupilCorrection=0,0 closed=1.788139E-05,100 proxy=0.7499999,-1.490116E-08
+reopen wide=0,0 pupilCorrection=0,0 closed=1.788139E-05,1.788139E-05 proxy=0.7499999,0.7499999
+palmWide wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+palmHalfWide wide=50,50 pupilCorrection=50,50 closed=0,0 proxy=0.875,0.875
+palmClosed wide=0,0 pupilCorrection=0,0 closed=0,0 proxy=-1.490116E-08,-1.490116E-08
+palmReopen wide=0,0 pupilCorrection=0,0 closed=0,0 proxy=0.75,0.75
+questWide wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+noFT wide=0,0 pupilCorrection=0,0 closed=0,0 proxy=-1.490116E-08,-1.490116E-08
+frameAgain wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+trackingStopped wide=0,0 pupilCorrection=0,0 closed=0,0 proxy=-1.490116E-08,-1.490116E-08
+trackingResumed wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+squintWide wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+pupilToggleOn wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+pupilToggleOff wide=100,100 pupilCorrection=100,100 closed=0,0 proxy=1,1
+pupilReopen wide=0,0 pupilCorrection=0,0 closed=0,0 proxy=0.75,0.75
+PASS 23 generated Animator cases. SDK parameter/layer behaviours emulated in EditMode. Cost=216

@@ -1,3 +1,5 @@
-Left: Body blendShape.AAO_Merged_EyeWideLeft_156
-Right: Body blendShape.AAO_Merged_EyeWideRight_157
-PASS AAO Trace And Optimize enabled on clone; both shapes and bindings retained; cost=216
+EyeWideLeft: Body blendShape.AAO_Merged_EyeWideLeft_156
+EyeWideRight: Body blendShape.AAO_Merged_EyeWideRight_157
+MilfyEyeWidePupilLeft: Body blendShape.AAO_Merged_MilfyEyeWidePupilLeft_158
+MilfyEyeWidePupilRight: Body blendShape.AAO_Merged_MilfyEyeWidePupilRight_159
+PASS AAO Trace And Optimize enabled on clone; all four widening/pupil shapes and bindings retained; cost=216
