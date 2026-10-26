@@ -1,1 +1,0 @@
-PASS all 706 existing renderer weights retained; source reference unchanged=True; AAO components=Anatawa12.AvatarOptimizer.MergeSkinnedMesh enabled=True,Anatawa12.AvatarOptimizer.MergeSkinnedMesh enabled=True,Anatawa12.AvatarOptimizer.MergeSkinnedMesh enabled=True

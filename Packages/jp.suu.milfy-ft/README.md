@@ -36,27 +36,35 @@ Jerry's Templates は互換性を保証するため 7.0.5 に固定していま�
 
 `OSCmooth` を別途導入する必要はありません。眼球回転用に生成済みの24アニメーションをこのパッケージへ収録しています。
 
-セットアップウィンドウは、未改変Milfyの `Body` を検証してから39個のFT用BlendShapeを持つ別Meshアセットを生成します。ビルド時に見開き用2形状、瞳孔縮小用2形状、黒目・ハイライト縮小用2形状を追加するため、ビルド中のMeshではFT用・補正用合わせて45形状になります（最適化前）。FBXや `Body` の頂点構成が違う場合は処理を開始しません。
+セットアップウィンドウは、未改変Milfyの `Body` を検証してから、配布BlendShareデータの41個のFT用BlendShapeを持つ別Meshアセットを生成します。元FBXと頂点構成が違う場合は処理を開始しません。
 
 ## 目の見開き（1.2.0以降）
 
-`EyeWideLeft` / `EyeWideRight` を左右独立に駆動します。Jerry's Templates 7.0.5の既存まぶた入力を使用し、`FT/v2/EyeLidLeft` / `Right` が `0.75` のとき通常開眼、`1.0` のとき最大見開きです。途中の値にも連続して追従します。平滑化済みProxy入力から見開きだけを制御する2レイヤーを生成し、追跡停止時には見開きを明示的に0へ戻します。瞬き・視線・他の形状の既存アニメーションは保持します。新しいOSCパラメーターや同期bitは追加しません。
+従来の39形状に `EyeWideLeft` / `EyeWideRight` を追加しました。左右それぞれの見開き、瞳孔縮小、黒目全体と星型を含むハイライトの縮小・位置調整を、この2形状へ合成済みです。通常のセットアップ後からInspectorで確認でき、NDMFでMeshや独自の補正形状を追加生成する処理はありません。
 
-NDMFビルド時に `Body` のMeshを複製し、Milfy標準の `eye_surprised_L` / `R` から不足する見開き形状だけを追加します。既存の `EyeWideLeft` / `Right` は保持し、元のFBX・Meshアセットは変更しません。左右のまぶたと瞳孔を連動させ、眉や口の驚き表情は追加しません。セットアップ画面で生成する39形状のMeshとBlendShareデータは従来どおりです。未ビルドの通常Scene上には追加形状は表示されません。
+最大見開きの合成内容は、Milfy標準の `eye_surprised_L/R` と、その側の `pupul_small` の50%相当、`eye_op_small_２`（末尾は全角２）の40%相当です。元の形状を直接固定せず、追加したFT形状で動かします。
 
-見開きに合わせて、その側の瞳孔も連続的に小さくなります。Milfy標準の `pupul_small`（原データの表記）から左右専用の `MilfyEyeWidePupilLeft` / `Right` を生成し、最大見開きで標準縮小形状の50%相当まで縮めます。通常開眼、追跡停止、FTオフでは連動縮小を0へ戻します。
+Jerry's Templates 7.0.5のまぶた入力を使用します。目細め入力が0の場合、`FT/v2/EyeLidLeft/Right` が `0.75` で通常開眼、`1.0` で最大見開きとなり、間の値にも連続して追従します。EyeLid×EyeSquintの合成もJerryの既存2Dツリーに合わせています。
 
-これは見開きに連動する表現補正で、実測瞳孔入力への新規対応ではありません。既に `EyeConstrict` / `EyeDilation` の両形状を持つMeshで `Eye Dilation Tracking` をオンにした場合だけ、連動縮小を止めて既存の瞳孔制御へ譲ります。標準Milfyでは両形状がないため、過去にこのトグルをオンで保存していても見開き連動は動作します。
+追跡停止・FTオフ時は、既存のShape Adapter内の分岐で `EyeWideLeft/Right` を明示的に0へ戻します。新しいAnimatorレイヤー、OSCパラメーター、同期bitは追加しません。
 
-黒目全体（虹彩を含む）とハイライトも、その側の見開きに比例して一緒に小さくします。標準の `eye_op_small_２`（末尾は全角２）を最大40%相当で使い、黒目から星型ハイライトだけが浮かないよう、大きさと位置をまとめて補正します。左右専用の `MilfyEyeWideIrisLeft` / `Right` を生成し、元の顔設定・形状は保持します。通常開眼・追跡停止・FTオフではこの補正も0へ戻します。
-
-実測瞳孔対応Meshで `Eye Dilation Tracking` をオンにした場合も、黒目全体とハイライトの縮小は維持します。抑制するのは追加の瞳孔専用補正だけであり、最終的な見た目の瞳孔サイズを実測値と完全に一致させる機能ではありません。
+これは見開きに連動する表現で、実測瞳孔入力への新規対応ではありません。縮瞳はEyeWideに焼き込まれているため、`Eye Dilation Tracking` では瞳孔補正だけを切り離せません。カスタムの `EyeConstrict/EyeDilation` との加算は個別調整が必要です。
 
 ### 1.1.xからの更新
 
-パッケージ更新後、アバターを再ビルドしてアップロードしてください。セットアップのやり直しや既存Meshの再生成は不要です。元の目の形状を削除したMeshや `Body` の名前・構成を変更したアバターは対象外です。不足する形状を生成できない場合は、ビルドでエラーを表示します。
+パッケージ更新だけでは、以前作った39形状のMeshは変わりません。次の操作で更新してください。
 
-[frameeyeosc](https://github.com/sasaken1102r/frameeyeosc) を使用する場合は、VRCFaceTrackingの **LiveLink** または **FrameEyeOSC** モジュール経由で見開きを送信してください。ETVRモードでは見開きが伝わりません。このパッケージはJerryのビットパラメーターも使用するため、frameeyeoscからVRChatへの直接送信を標準の接続方法として扱いません。SteamOS 0.4.3で見開きを取得するには、frameeyeosc側のeye camerasのセットアップも必要です。
+1. Hierarchy上のセットアップ済みアバタールートを選択します。
+2. `Tools/suu_MifyFT/Update selected FT mesh to 1.2.0` を実行します。
+3. `Body` に新しいMeshが割り当てられたことを確認し、Sceneを保存して再ビルド・アップロードします。
+
+現在のMeshを複製し、配布データの `EyeWideLeft/Right` を追加または置換します。元Mesh、その他の形状、rendererの設定値を保持します。更新前からEyeWideがある場合も新しい合成形状へ更新されます。Sceneは自動保存せず、Undoで割当を戻せます。生成したMeshアセットはUndo後も残ります。
+
+Prefab ModeとPreview Sceneは更新対象外です。試用版の `MilfyEyeWidePupil*` / `MilfyEyeWideIris*` が非ゼロの場合は、二重変形を避けるため更新を止めます。0へ戻してから更新してください。これらの形状データは自動削除しません。
+
+新規導入では通常のsetupを実行すれば41形状を生成します。手動運用では従来どおりBlendShareの `Create Meshes` を使用できます。
+
+[frameeyeosc](https://github.com/sasaken1102r/frameeyeosc) はVRCFaceTrackingの **LiveLink** または **FrameEyeOSC** モジュール経由を使用してください。ETVRモードでは見開きが伝わりません。このパッケージはJerryのビットパラメーターを使用するため、VRChatへの直接送信を標準の接続方法として扱いません。SteamOS 0.4.3で見開きを取得するには、frameeyeosc側のeye camerasも必要です。
 
 ## 追加6形状
 
@@ -71,7 +79,7 @@ Jerry's Templates 7.0.5が標準では直接出力しない次の形状は、`Mi
 
 Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLowerDownLeft` と `MouthLowerDownRight` は同じ値で動きます。左右を独立させるにはFT構成全体の変更が必要です。
 
-`Milfy FT Shape Adapter` レイヤーが書き込むのは上記6形状だけです。Milfyに元からある `BrowInnerUp` などのBlendShapeは変更・固定しません。既存表情とFT表情の競合や合成は、このパッケージより上位の表情制御レイヤーで調整してください。
+`Milfy FT Shape Adapter` レイヤーが書き込むのは上記6形状と `EyeWideLeft/Right` の計8形状です。Milfyに元からある `BrowInnerUp` などのBlendShapeは変更・固定しません。既存表情とFT表情の競合や合成は、このパッケージより上位の表情制御レイヤーで調整してください。
 
 ## 設定メニュー
 
@@ -83,7 +91,7 @@ Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLow
 
 ## パラメーター容量
 
-`FT/Debug` と、Milfy FTの39形状に存在しない次の入力の量子化パラメーターは Local Only に設定しています。
+`FT/Debug` と、Milfy FTの41形状に存在しない次の入力の量子化パラメーターは Local Only に設定しています。
 
 - 瞳孔の拡縮
 - Lip Suck Upper / Lower
@@ -94,7 +102,7 @@ Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLow
 - Mouth Tightener Left / Right
 - 舌の左右・上下・Roll
 
-これらはJerry's Templates内で、Milfy FTの生成Meshに存在しないBlendShapeだけを駆動する入力です。対応する39形状の同期は維持しています。
+これらはJerry's Templates内で、Milfy FTの生成Meshに存在しないBlendShapeだけを駆動する入力です。対応する41形状の同期は維持しています。
 
 Milfy v1.5.0の初期Expression Parameters（99 bits）と合成した場合は **234 / 256 bits** です。対応形状の `TongueOut` は別パラメーターのためリモート同期を維持します。
 

@@ -1,1 +1,0 @@
-PASS combined left/right pupil correction matches native pupul_small=50; max vertex delta=1.193256E-07; all 706 original renderer weights retained; source mesh unchanged=True

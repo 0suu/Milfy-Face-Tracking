@@ -1,0 +1,1 @@
+PASS original 39 serialized shape blocks preserved byte-for-byte after newline normalization.

@@ -1,1 +1,1 @@
-PASS fresh setup + NDMF widening, pupil and iris contraction; non-FT avatar unchanged; source mesh remains Assets/PLUSONE/Milfy/FBX/Milfy.fbx
+PASS fresh BlendShare41 setup + NDMF compound EyeWideLeft/Right; non-FT avatar unchanged; source mesh remains Assets/PLUSONE/Milfy/FBX/Milfy.fbx

@@ -1,7 +1,3 @@
 EyeWideLeft: Body blendShape.AAO_Merged_EyeWideLeft_156
 EyeWideRight: Body blendShape.AAO_Merged_EyeWideRight_157
-MilfyEyeWidePupilLeft: Body blendShape.AAO_Merged_MilfyEyeWidePupilLeft_MilfyEyeWideIrisLeft_158
-MilfyEyeWidePupilRight: Body blendShape.AAO_Merged_MilfyEyeWidePupilRight_MilfyEyeWideIrisRight_159
-MilfyEyeWideIrisLeft: Body blendShape.AAO_Merged_MilfyEyeWidePupilLeft_MilfyEyeWideIrisLeft_158
-MilfyEyeWideIrisRight: Body blendShape.AAO_Merged_MilfyEyeWidePupilRight_MilfyEyeWideIrisRight_159
-PASS AAO Trace And Optimize enabled on clone; all six widening/pupil/iris controls and bindings retained; identical pupil/iris curves may share an AAO merged shape; cost=216
+PASS AAO Trace And Optimize enabled on clone; two BlendShare41 compound EyeWide shapes and bindings retained; cost=216

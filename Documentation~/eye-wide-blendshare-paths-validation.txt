@@ -1,0 +1,3 @@
+Left Unity/FBX max delta=1.642594E-07
+Right Unity/FBX max delta=1.642594E-07
+PASS new BlendShare Create Meshes and FBX routes; vertexCount=12166; 41 FT shapes include compound EyeWideLeft/Right.
