@@ -1,0 +1,1 @@
+PASS combined owned pupil/iris shapes match native pupul_small=50 + eye_op_small_２=40 (iris and highlights); max vertex delta=1.19282E-07; original 706 renderer weights retained; source mesh unchanged=True

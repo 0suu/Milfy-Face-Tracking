@@ -1,4 +1,4 @@
-PASS 15 NUnit fixture checks invoked directly in EditMode. Unity Test Runner not run: current scene has unsaved changes.
+PASS 17 NUnit fixture checks invoked directly in EditMode. Unity Test Runner not run: current scene has unsaved changes.
 AddsBothSidesWithoutChangingSourceOrExistingIndices()
 PreservesAllFramesWeightsNormalsAndTangents()
 PreservesCustomWideAndOnlyRequiresMissingSidesSource(Left,R)
@@ -10,7 +10,9 @@ DisablingTrackingClearsPreviouslyWidenedEyesWithWriteDefaultsOff(False,0)
 DisablingTrackingClearsPreviouslyWidenedEyesWithWriteDefaultsOff(False,1)
 DisablingTrackingClearsPreviouslyWidenedEyesWithWriteDefaultsOff(True,0)
 DisablingTrackingClearsPreviouslyWidenedEyesWithWriteDefaultsOff(True,1)
-SplitsPupilsIndependentlyAtHalfStrengthAndPreservesFrames()
+SplitsEyeContractionIndependentlyAndPreservesFrames(False)
+SplitsEyeContractionIndependentlyAndPreservesFrames(True)
 PupilGenerationIsIdempotent()
 MissingPupilSourceFailsWithoutChangingSource()
 MissingOnePupilSideFailsWithoutChangingSource()
+MissingIrisSourceFailsWithoutChangingSource()

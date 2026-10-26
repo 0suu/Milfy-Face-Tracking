@@ -50,6 +50,17 @@ namespace Suu.MilfyFT.Editor
             {
                 if (widened != body.sharedMesh && widened != mesh) Object.DestroyImmediate(widened);
             }
+            var contractedPupils = mesh;
+            mesh = null;
+            try
+            {
+                mesh = CreateIrisMesh(contractedPupils);
+            }
+            finally
+            {
+                if (contractedPupils != body.sharedMesh && contractedPupils != mesh)
+                    Object.DestroyImmediate(contractedPupils);
+            }
             if (mesh != body.sharedMesh)
             {
                 context.AssetSaver.SaveAsset(mesh);
@@ -81,11 +92,15 @@ namespace Suu.MilfyFT.Editor
                     AnimationCurve.Constant(0, 1, 0));
                 neutral.SetCurve(path, typeof(SkinnedMeshRenderer), "blendShape.MilfyEyeWidePupil" + side,
                     AnimationCurve.Constant(0, 1, 0));
+                neutral.SetCurve(path, typeof(SkinnedMeshRenderer), "blendShape.MilfyEyeWideIris" + side,
+                    AnimationCurve.Constant(0, 1, 0));
                 var wide = Object.Instantiate(neutral);
                 wide.name = "Milfy Eye Wide " + side + " On";
                 wide.SetCurve(path, typeof(SkinnedMeshRenderer), "blendShape.EyeWide" + side,
                     AnimationCurve.Constant(0, 1, 100));
                 wide.SetCurve(path, typeof(SkinnedMeshRenderer), "blendShape.MilfyEyeWidePupil" + side,
+                    AnimationCurve.Constant(0, 1, 100));
+                wide.SetCurve(path, typeof(SkinnedMeshRenderer), "blendShape.MilfyEyeWideIris" + side,
                     AnimationCurve.Constant(0, 1, 100));
                 var lid = new BlendTree
                 {
@@ -147,14 +162,25 @@ namespace Suu.MilfyFT.Editor
 
         internal static Mesh CreatePupilMesh(Mesh source)
         {
+            // pupul_small is the spelling in the original Milfy data.
+            return CreateSplitEyeMesh(source, "pupul_small", "MilfyEyeWidePupil", .5f);
+        }
+
+        internal static Mesh CreateIrisMesh(Mesh source)
+        {
+            // This variant scales the iris and its highlights together. The final character is full-width 2.
+            return CreateSplitEyeMesh(source, "eye_op_small_２", "MilfyEyeWideIris", .4f);
+        }
+
+        private static Mesh CreateSplitEyeMesh(Mesh source, string nativeName, string targetPrefix, float strength)
+        {
             if (source == null) throw new ArgumentNullException(nameof(source));
             var missingSides = new[] { "Left", "Right" }
-                .Where(side => source.GetBlendShapeIndex("MilfyEyeWidePupil" + side) < 0).ToArray();
+                .Where(side => source.GetBlendShapeIndex(targetPrefix + side) < 0).ToArray();
             if (missingSides.Length == 0) return source;
-            // This spelling is the original Milfy shape name, not a typo to correct here.
-            var index = source.GetBlendShapeIndex("pupul_small");
+            var index = source.GetBlendShapeIndex(nativeName);
             if (index < 0)
-                throw new InvalidOperationException("Milfy FT: pupil contraction requires the native pupul_small shape.");
+                throw new InvalidOperationException("Milfy FT: eye contraction requires the native " + nativeName + " shape.");
 
             var positions = source.vertices;
             var vertices = new Vector3[source.vertexCount];
@@ -171,11 +197,11 @@ namespace Suu.MilfyFT.Editor
                             vertices[v] != Vector3.zero) hasDisplacement = true;
                 }
                 if (!hasDisplacement)
-                    throw new InvalidOperationException("Milfy FT: pupul_small has no " + side + " pupil displacement.");
+                    throw new InvalidOperationException("Milfy FT: " + nativeName + " has no " + side + " eye displacement.");
             }
 
             var result = Object.Instantiate(source);
-            result.name = source.name + " (Pupil Contraction)";
+            result.name = source.name + " (" + targetPrefix + ")";
             try
             {
                 foreach (var side in missingSides)
@@ -185,12 +211,12 @@ namespace Suu.MilfyFT.Editor
                     for (var v = 0; v < positions.Length; v++)
                     {
                         // Unmodified Milfy uses local +X for anatomical left, -X for right.
-                        var scale = (side == "Left" ? positions[v].x > 0 : positions[v].x < 0) ? .5f : 0;
+                        var scale = (side == "Left" ? positions[v].x > 0 : positions[v].x < 0) ? strength : 0;
                         vertices[v] *= scale;
                         normals[v] *= scale;
                         tangents[v] *= scale;
                     }
-                    result.AddBlendShapeFrame("MilfyEyeWidePupil" + side,
+                    result.AddBlendShapeFrame(targetPrefix + side,
                         source.GetBlendShapeFrameWeight(index, frame), vertices, normals, tangents);
                 }
                 return result;

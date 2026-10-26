@@ -133,6 +133,8 @@ namespace Suu.MilfyFT.Tests
             AddShape("EyeWideRight", 100, Vector3.left);
             AddShape("MilfyEyeWidePupilLeft", 100, Vector3.right);
             AddShape("MilfyEyeWidePupilRight", 100, Vector3.left);
+            AddShape("MilfyEyeWideIrisLeft", 100, Vector3.right);
+            AddShape("MilfyEyeWideIrisRight", 100, Vector3.left);
             var root = new GameObject("Eye wide test");
             var graph = PlayableGraph.Create("Eye wide reset test");
             AnimatorController controller = null;
@@ -178,6 +180,8 @@ namespace Suu.MilfyFT.Tests
                     {
                         Assert.That(renderer.GetBlendShapeWeight(_source.GetBlendShapeIndex("EyeWide" + side)),
                             Is.EqualTo(active * 100).Within(.01f));
+                        Assert.That(renderer.GetBlendShapeWeight(_source.GetBlendShapeIndex("MilfyEyeWideIris" + side)),
+                            Is.EqualTo(active * 100).Within(.01f));
                         Assert.That(renderer.GetBlendShapeWeight(_source.GetBlendShapeIndex("MilfyEyeWidePupil" + side)),
                             Is.EqualTo(active * 100 * (supportsTrackedPupils ? 1 - pupilTrackingValue : 1)).Within(.01f));
                     }
@@ -209,39 +213,40 @@ namespace Suu.MilfyFT.Tests
             }
         }
 
-        private void AddNativePupil()
+        private void AddNativePupil(string nativeName = "pupul_small")
         {
             _source.vertices = new[] { Vector3.left, Vector3.right, Vector3.up };
             foreach (var weight in new[] { 50f, 100f })
-                _source.AddBlendShapeFrame("pupul_small", weight,
+                _source.AddBlendShapeFrame(nativeName, weight,
                     new[] { Vector3.right * weight / 100, Vector3.left * weight / 100, Vector3.zero },
                     new[] { Vector3.forward, Vector3.back, Vector3.zero },
                     new[] { Vector3.up, Vector3.down, Vector3.zero });
         }
 
-        private Mesh BuildPupils()
+        private Mesh BuildPupils(bool iris = false)
         {
             var type = typeof(Editor.MilfyFtSetupService).Assembly
                 .GetType("Suu.MilfyFT.Editor.MilfyEyeWidePlugin", true);
             try
             {
-                return _result = (Mesh)type.GetMethod("CreatePupilMesh", BindingFlags.Static | BindingFlags.NonPublic)
+                return _result = (Mesh)type.GetMethod(iris ? "CreateIrisMesh" : "CreatePupilMesh", BindingFlags.Static | BindingFlags.NonPublic)
                     .Invoke(null, new object[] { _source });
             }
             catch (TargetInvocationException exception) { throw exception.InnerException; }
         }
 
-        [Test]
-        public void SplitsPupilsIndependentlyAtHalfStrengthAndPreservesFrames()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void SplitsEyeContractionIndependentlyAndPreservesFrames(bool iris)
         {
-            AddNativePupil();
-            var result = BuildPupils();
+            AddNativePupil(iris ? "eye_op_small_２" : "pupul_small");
+            var result = BuildPupils(iris);
             Assert.That(_source.blendShapeCount, Is.EqualTo(3));
             Assert.That(result.blendShapeCount, Is.EqualTo(5));
             AssertShapeEqual(_source, 2, result, 2);
             foreach (var side in new[] { "Left", "Right" })
             {
-                var index = result.GetBlendShapeIndex("MilfyEyeWidePupil" + side);
+                var index = result.GetBlendShapeIndex((iris ? "MilfyEyeWideIris" : "MilfyEyeWidePupil") + side);
                 Assert.That(result.GetBlendShapeFrameCount(index), Is.EqualTo(2));
                 for (var frame = 0; frame < 2; frame++)
                 {
@@ -253,7 +258,7 @@ namespace Suu.MilfyFT.Tests
                     for (var channel = 0; channel < 3; channel++)
                     for (var vertex = 0; vertex < 3; vertex++)
                         Assert.That(actual[channel][vertex], Is.EqualTo(vertex == (side == "Left" ? 1 : 0)
-                            ? original[channel][vertex] * .5f : Vector3.zero));
+                            ? original[channel][vertex] * (iris ? .4f : .5f) : Vector3.zero));
                 }
             }
         }
@@ -283,6 +288,13 @@ namespace Suu.MilfyFT.Tests
             AddShape("pupul_small", 100, Vector3.up);
             Assert.Throws<InvalidOperationException>(() => BuildPupils());
             Assert.That(_source.blendShapeCount, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void MissingIrisSourceFailsWithoutChangingSource()
+        {
+            Assert.Throws<InvalidOperationException>(() => BuildPupils(true));
+            Assert.That(_source.blendShapeCount, Is.EqualTo(2));
         }
 
         private static void AssertShapeEqual(Mesh source, int sourceIndex, Mesh target, int targetIndex)

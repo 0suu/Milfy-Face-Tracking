@@ -1,1 +1,1 @@
-PASS fresh setup + NDMF widening and pupil contraction; non-FT avatar unchanged; source mesh remains Assets/PLUSONE/Milfy/FBX/Milfy.fbx
+PASS fresh setup + NDMF widening, pupil and iris contraction; non-FT avatar unchanged; source mesh remains Assets/PLUSONE/Milfy/FBX/Milfy.fbx
