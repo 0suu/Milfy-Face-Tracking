@@ -1,0 +1,6 @@
+{
+  "name": "Suu.MilfyFT.Editor.Tests",
+  "references": ["Suu.MilfyFT.Editor"],
+  "includePlatforms": ["Editor"],
+  "optionalUnityReferences": ["TestAssemblies"]
+}

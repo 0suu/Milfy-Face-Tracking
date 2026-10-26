@@ -1,0 +1,9 @@
+PASS 8 NUnit fixture checks invoked directly in EditMode. Unity Test Runner not run: current scene has unsaved changes.
+AddsBothSidesWithoutChangingSourceOrExistingIndices()
+PreservesAllFramesWeightsNormalsAndTangents()
+PreservesCustomWideAndOnlyRequiresMissingSidesSource(Left,R)
+PreservesCustomWideAndOnlyRequiresMissingSidesSource(Right,L)
+AlreadySupportedMeshIsUnchangedAndIdempotent()
+MissingNativeSideFailsBeforeMutatingSource()
+ZeroDisplacementFailsBeforeMutatingSource()
+DisablingTrackingClearsPreviouslyWidenedEyesWithWriteDefaultsOff()

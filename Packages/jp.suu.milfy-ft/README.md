@@ -15,7 +15,7 @@
 
 Jerry's Templates は互換性を保証するため 7.0.5 に固定しています。VRCFaceTracking 本体は PC 側で別途セットアップしてください。
 
-現在の動作確認環境は VRChat Avatars SDK 3.10.4、Modular Avatar 1.17.1、BlendShare 1.0.3、Jerry's Templates 7.0.5 です。依存範囲内の全バージョンを個別に検証したものではありません。
+現在の動作確認環境は VRChat Avatars SDK 3.10.4、Modular Avatar 1.18.1、BlendShare 1.0.3、Jerry's Templates 7.0.5 です。依存範囲内の全バージョンを個別に検証したものではありません。
 
 ## 導入方法
 
@@ -36,7 +36,19 @@ Jerry's Templates は互換性を保証するため 7.0.5 に固定していま�
 
 `OSCmooth` を別途導入する必要はありません。眼球回転用に生成済みの24アニメーションをこのパッケージへ収録しています。
 
-セットアップウィンドウは、未改変Milfyの `Body` を検証してから39個のFT用BlendShapeを持つ別Meshアセットを生成します。FBXや `Body` の頂点構成が違う場合は処理を開始しません。
+セットアップウィンドウは、未改変Milfyの `Body` を検証してから39個のFT用BlendShapeを持つ別Meshアセットを生成します。ビルド時に見開き用の2形状を追加するため、ビルド中のMeshではFT用41形状になります（最適化前）。FBXや `Body` の頂点構成が違う場合は処理を開始しません。
+
+## 目の見開き（1.2.0以降）
+
+`EyeWideLeft` / `EyeWideRight` を左右独立に駆動します。Jerry's Templates 7.0.5の既存まぶた入力を使用し、`FT/v2/EyeLidLeft` / `Right` が `0.75` のとき通常開眼、`1.0` のとき最大見開きです。途中の値にも連続して追従します。平滑化済みProxy入力から見開きだけを制御する2レイヤーを生成し、追跡停止時には見開きを明示的に0へ戻します。瞬き・視線・他の形状の既存アニメーションは保持します。新しいOSCパラメーターや同期bitは追加しません。
+
+NDMFビルド時に `Body` のMeshを複製し、Milfy標準の `eye_surprised_L` / `R` から不足する見開き形状だけを追加します。既存の `EyeWideLeft` / `Right` は保持し、元のFBX・Meshアセットは変更しません。左右のまぶただけを広げ、眉や口の驚き表情は追加しません。セットアップ画面で生成する39形状のMeshとBlendShareデータは従来どおりです。未ビルドの通常Scene上には追加形状は表示されません。
+
+### 1.1.xからの更新
+
+パッケージ更新後、アバターを再ビルドしてアップロードしてください。セットアップのやり直しや既存Meshの再生成は不要です。元の目の形状を削除したMeshや `Body` の名前・構成を変更したアバターは対象外です。不足する形状を生成できない場合は、ビルドでエラーを表示します。
+
+[frameeyeosc](https://github.com/sasaken1102r/frameeyeosc) を使用する場合は、VRCFaceTrackingの **LiveLink** または **FrameEyeOSC** モジュール経由で見開きを送信してください。ETVRモードでは見開きが伝わりません。このパッケージはJerryのビットパラメーターも使用するため、frameeyeoscからVRChatへの直接送信を標準の接続方法として扱いません。SteamOS 0.4.3で見開きを取得するには、frameeyeosc側のeye camerasのセットアップも必要です。
 
 ## 追加6形状
 

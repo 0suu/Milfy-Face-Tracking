@@ -1,0 +1,3 @@
+Left: Body blendShape.AAO_Merged_EyeWideLeft_156
+Right: Body blendShape.AAO_Merged_EyeWideRight_157
+PASS AAO Trace And Optimize enabled on clone; both shapes and bindings retained; cost=216
