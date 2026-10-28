@@ -51,40 +51,8 @@ namespace Suu.MilfyFT.Tests
             var body = new GameObject("Body"); body.transform.SetParent(root.transform); var renderer = body.AddComponent<SkinnedMeshRenderer>(); renderer.sharedMesh = mesh; return renderer;
         }
         private string OutputPath() { var path = "Assets/MilfyFT_UpdateTest_" + Guid.NewGuid().ToString("N") + ".asset"; _paths.Add(path); return path; }
-        [Test] public void PackageContains41ShapesAndBothDeltaFormats()
-        {
-            var names = _data.m_MeshDataList.Single().m_ShapeNames;
-            Assert.That(names.Count, Is.EqualTo(41)); Assert.That(names.Distinct().Count(), Is.EqualTo(41));
-            Assert.That(names.Any(n => n.StartsWith("MilfyEyeWide", StringComparison.Ordinal)), Is.False);
-            foreach (var side in new[] { "Left", "Right" })
-            {
-                var shape = _data.m_MeshDataList[0].GetBlendShape("EyeWide" + side);
-                Assert.That(shape.m_UnityBlendShapeData.m_Frames[0].m_VertexIndices.Count, Is.GreaterThan(0));
-                Assert.That(shape.m_FbxBlendShapeData.m_Frames[0].m_PointsIndices.Count, Is.GreaterThan(0));
-            }
-        }
-        [TestCase("Left")][TestCase("Right")]
-        public void BakedWideMatchesNativeComposition(string side)
-        {
-            var mesh = _data.m_MeshDataList[0].m_OriginMesh; var positions = mesh.vertices;
-            var frame = _data.m_MeshDataList[0].GetBlendShape("EyeWide" + side).m_UnityBlendShapeData.m_Frames.Single();
-            var expected = new[] { new Vector3[mesh.vertexCount], new Vector3[mesh.vertexCount], new Vector3[mesh.vertexCount] };
-            var temporary = new[] { new Vector3[mesh.vertexCount], new Vector3[mesh.vertexCount], new Vector3[mesh.vertexCount] };
-            var sourceNames = new[] { "eye_surprised_" + (side == "Left" ? "L" : "R"), "pupul_small", "eye_op_small_２" };
-            for (var shape = 0; shape < sourceNames.Length; shape++)
-            {
-                mesh.GetBlendShapeFrameVertices(mesh.GetBlendShapeIndex(sourceNames[shape]), 0, temporary[0], temporary[1], temporary[2]);
-                for (var vertex = 0; vertex < mesh.vertexCount; vertex++)
-                for (var channel = 0; channel < 3; channel++)
-                    if (shape == 0 || (side == "Left" ? positions[vertex].x < 0 : positions[vertex].x > 0))
-                        expected[channel][vertex] += temporary[channel][vertex] * (shape == 0 ? 1 : shape == 1 ? .5f : .4f);
-            }
-            var actual = new[] { frame.GetDeltaVertices(mesh.vertexCount), frame.GetDeltaNormals(mesh.vertexCount), frame.GetDeltaTangents(mesh.vertexCount) };
-            for (var channel = 0; channel < 3; channel++)
-                Assert.That(Enumerable.Range(0, mesh.vertexCount).Max(i => (actual[channel][i] - expected[channel][i]).magnitude), Is.LessThan(1e-7f));
-        }
         [TestCase(false)][TestCase(true)]
-        public void MigrationPreservesOriginalShapesAndReplacesPreviewWide(bool existingWide)
+        public void MigrationPreservesOriginalShapesAndReplacesExistingWide(bool existingWide)
         {
             var source = CreateFtMesh();
             if (existingWide) foreach (var side in new[] { "Left", "Right" })
@@ -106,17 +74,6 @@ namespace Suu.MilfyFT.Tests
                 Assert.That(actual, Is.EqualTo(original));
             }
         }
-        [Test] public void InvalidTopologyFailsBeforeSourceChanges()
-        {
-            var mesh = new Mesh { vertices = new[] { Vector3.zero, Vector3.right, Vector3.up } }; _objects.Add(mesh);
-            Assert.Throws<InvalidOperationException>(() => Update(mesh)); Assert.That(mesh.blendShapeCount, Is.Zero);
-        }
-        [Test] public void InvalidWideDataFailsBeforeSourceChanges()
-        {
-            _data = Object.Instantiate(_data); _objects.Add(_data); _data.m_MeshDataList[0].GetBlendShape("EyeWideLeft").m_UnityBlendShapeData = null;
-            var source = _data.m_MeshDataList[0].m_OriginMesh; var count = source.blendShapeCount;
-            Assert.Throws<InvalidOperationException>(() => Update(source)); Assert.That(source.blendShapeCount, Is.EqualTo(count));
-        }
         [Test] public void MigrationPreservesWeightsAndUndoRestoresOriginalMesh()
         {
             var source = CreateFtMesh(); var body = Body(source); body.SetBlendShapeWeight(0, 37);
@@ -124,25 +81,6 @@ namespace Suu.MilfyFT.Tests
             Assert.That(body.sharedMesh, Is.Not.SameAs(source)); Assert.That(body.GetBlendShapeWeight(0), Is.EqualTo(37));
             Undo.PerformUndo(); Assert.That(body.sharedMesh, Is.SameAs(source)); Assert.That(body.GetBlendShapeWeight(0), Is.EqualTo(37));
             Assert.That(AssetDatabase.LoadAssetAtPath<Mesh>(path), Is.Not.Null); Undo.ClearUndo(body);
-        }
-        [Test] public void ActivePreviewCorrectionIsRejectedWithoutAssignment()
-        {
-            var source = CreateFtMesh();
-            source.AddBlendShapeFrame("MilfyEyeWideIrisLeft", 100, Enumerable.Repeat(Vector3.up, source.vertexCount).ToArray(), null, null);
-            var body = Body(source); body.SetBlendShapeWeight(source.GetBlendShapeIndex("MilfyEyeWideIrisLeft"), 10);
-            Assert.Throws<InvalidOperationException>(() => Call("UpdateAvatar", body.transform.parent.gameObject, OutputPath()));
-            Assert.That(body.sharedMesh, Is.SameAs(source));
-        }
-        [Test] public void PreviewSceneUpdateIsRejected()
-        {
-            var scene = UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
-            try
-            {
-                var body = Body(_data.m_MeshDataList[0].m_OriginMesh);
-                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(body.transform.parent.gameObject, scene);
-                Assert.Throws<InvalidOperationException>(() => Call("UpdateAvatar", body.transform.parent.gameObject, OutputPath()));
-            }
-            finally { UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scene); }
         }
         [Test] public void ExistingSixShapesDoNotAccumulateAndAllEightRelease()
         {

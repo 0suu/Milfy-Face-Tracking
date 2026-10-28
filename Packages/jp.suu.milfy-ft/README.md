@@ -40,31 +40,19 @@ Jerry's Templates は互換性を保証するため 7.0.5 に固定していま�
 
 ## 目の見開き（1.2.0以降）
 
-従来の39形状に `EyeWideLeft` / `EyeWideRight` を追加しました。左右それぞれの見開き、瞳孔縮小、黒目全体と星型を含むハイライトの縮小・位置調整を、この2形状へ合成済みです。通常のセットアップ後からInspectorで確認でき、NDMFでMeshや独自の補正形状を追加生成する処理はありません。
-
-最大見開きの合成内容は、Milfy標準の `eye_surprised_L/R` と、その側の `pupul_small` の50%相当、`eye_op_small_２`（末尾は全角２）の40%相当です。元の形状を直接固定せず、追加したFT形状で動かします。
-
-Jerry's Templates 7.0.5のまぶた入力を使用します。目細め入力が0の場合、`FT/v2/EyeLidLeft/Right` が `0.75` で通常開眼、`1.0` で最大見開きとなり、間の値にも連続して追従します。EyeLid×EyeSquintの合成もJerryの既存2Dツリーに合わせています。
-
-追跡停止・FTオフ時は、既存のShape Adapter内の分岐で `EyeWideLeft/Right` を明示的に0へ戻します。新しいAnimatorレイヤー、OSCパラメーター、同期bitは追加しません。
-
-これは見開きに連動する表現で、実測瞳孔入力への新規対応ではありません。縮瞳はEyeWideに焼き込まれているため、`Eye Dilation Tracking` では瞳孔補正だけを切り離せません。カスタムの `EyeConstrict/EyeDilation` との加算は個別調整が必要です。
+`EyeWideLeft/Right` により、見開きに合わせて瞳孔・黒目・星型を含むハイライトが連続して縮小します。Jerry 7.0.5のまぶた入力を使い、追跡停止時は0へ戻ります。縮瞳は見開きと一体で、実測瞳孔入力とは連動しません。
 
 ### 1.1.xからの更新
 
-パッケージ更新だけでは、以前作った39形状のMeshは変わりません。次の操作で更新してください。
+以前生成したMeshはパッケージ更新だけでは変わりません。
 
-1. Hierarchy上のセットアップ済みアバタールートを選択します。
+1. Play Modeを停止し、Hierarchy上のセットアップ済みアバタールートを選択します。
 2. `Tools/suu_MifyFT/Update selected FT mesh to 1.2.0` を実行します。
-3. `Body` に新しいMeshが割り当てられたことを確認し、Sceneを保存して再ビルド・アップロードします。
+3. 表情を確認してSceneを保存し、再ビルド・アップロードします。
 
-現在のMeshを複製し、配布データの `EyeWideLeft/Right` を追加または置換します。元Mesh、その他の形状、rendererの設定値を保持します。更新前からEyeWideがある場合も新しい合成形状へ更新されます。Sceneは自動保存せず、Undoで割当を戻せます。生成したMeshアセットはUndo後も残ります。
+元Meshを残して複製し、EyeWideだけを追加・置換します。他の形状と設定値は保持し、Undoで割当を戻せます（生成Meshは残ります）。Prefab Modeでは実行できません。新規導入は通常のsetupを使用します。
 
-Play Mode中・移行中、Prefab Mode、Preview Sceneは更新対象外です。試用版の `MilfyEyeWidePupil*` / `MilfyEyeWideIris*` が非ゼロの場合は、二重変形を避けるため更新を止めます。0へ戻してから更新してください。これらの形状データは自動削除しません。
-
-新規導入では通常のsetupを実行すれば41形状を生成します。手動運用では従来どおりBlendShareの `Create Meshes` を使用できます。
-
-[frameeyeosc](https://github.com/sasaken1102r/frameeyeosc) はVRCFaceTrackingの **LiveLink** または **FrameEyeOSC** モジュール経由を使用してください。ETVRモードでは見開きが伝わりません。このパッケージはJerryのビットパラメーターを使用するため、VRChatへの直接送信を標準の接続方法として扱いません。SteamOS 0.4.3で見開きを取得するには、frameeyeosc側のeye camerasも必要です。
+[frameeyeosc](https://github.com/sasaken1102r/frameeyeosc) はVRCFaceTrackingのLiveLinkまたはFrameEyeOSCモジュール経由で接続してください。ETVRモードでは見開きが伝わりません。
 
 ## 追加6形状
 

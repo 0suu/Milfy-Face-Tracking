@@ -14,11 +14,6 @@ namespace Suu.MilfyFT.Editor
     {
         private const string DataPath = "Packages/jp.suu.milfy-ft/Runtime/BlendShare/Milfy_FT_BlendShapes.asset";
         private static readonly string[] WideNames = { "EyeWideLeft", "EyeWideRight" };
-        private static readonly string[] PreviewNames =
-        {
-            "MilfyEyeWidePupilLeft", "MilfyEyeWidePupilRight",
-            "MilfyEyeWideIrisLeft", "MilfyEyeWideIrisRight"
-        };
 
         [MenuItem("Tools/suu_MifyFT/Update selected FT mesh to 1.2.0")]
         private static void UpdateSelected()
@@ -51,12 +46,6 @@ namespace Suu.MilfyFT.Editor
             var source = body.sharedMesh;
             if (source.GetBlendShapeIndex("EyeClosedLeft") < 0 || source.GetBlendShapeIndex("EyeClosedRight") < 0)
                 throw new InvalidOperationException("FTセットアップ済みのMeshが必要です。未導入の場合はsetupを使用してください。");
-            foreach (var name in PreviewNames)
-            {
-                var index = source.GetBlendShapeIndex(name);
-                if (index >= 0 && !Mathf.Approximately(body.GetBlendShapeWeight(index), 0))
-                    throw new InvalidOperationException("試用版の " + name + " が有効です。二重変形を防ぐため0に戻してから更新してください。");
-            }
             var data = AssetDatabase.LoadAssetAtPath<BlendShapeDataSO>(DataPath);
             if (data == null) throw new InvalidOperationException("Milfy FTのBlendShareデータが見つかりません。");
             var mesh = CreateUpdatedMesh(source, data);
