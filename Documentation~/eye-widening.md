@@ -26,7 +26,7 @@ WD Offの非正規化Direct BlendTreeでは、未指定propertyが前フレー�
 
 更新は現在のMeshを複製し、EyeWide2形状だけを配布データで追加・置換する。他の形状、順序、微小な頂点・法線・接線差分、renderer weight、元Meshを保持する。既存EyeWideも置換するため、試用版からも更新できる。Undoで元の割当へ戻せる（生成アセットは残る）。Sceneは自動保存しない。
 
-Prefab Mode/Preview Sceneは拒否する。試用版の `MilfyEyeWidePupil*` / `MilfyEyeWideIris*` が非ゼロなら二重変形を防ぐため停止する。0ならデータを保持し、自動削除はしない。移行後はSceneの保存と再ビルド・アップロードが必要。
+Play Mode中・移行中とPrefab Mode/Preview Sceneは拒否する。試用版の `MilfyEyeWidePupil*` / `MilfyEyeWideIris*` が非ゼロなら二重変形を防ぐため停止する。0ならデータを保持し、自動削除はしない。移行後はSceneの保存と再ビルド・アップロードが必要。
 
 ## 検証（2026-10-26）
 
@@ -43,6 +43,12 @@ Prefab Mode/Preview Sceneは拒否する。試用版の `MilfyEyeWidePupil*` / `
 - 現在のローカルアバターも更新メニューと同じ経路で移行し、706個の従来weightと元Meshの保持を確認。Sceneは未保存、Undo可能。
 
 ![生成後の見開きと左右独立の確認](eye-wide-comparison.png)
+
+## 2026-10-28のレビュー修正
+
+移行処理の先頭でPlay Mode中・移行中を拒否する。未参照の中間clip 12個を削除し、使用中の54 subassetは内容・参照を保持した。テストでは複製Meshに不足する既存FT形状を補い、元FBXへの事前適用を前提にしない。テスト件数や新規依存は追加していない。
+
+この修正では差分・参照整合性を確認した。Unityが起動していないため、コンパイルとfixtureの再実行は未実施。上記2026-10-26の結果は修正前の検証記録。
 
 ## 未実施
 

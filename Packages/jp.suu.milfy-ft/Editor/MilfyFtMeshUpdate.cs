@@ -38,6 +38,8 @@ namespace Suu.MilfyFT.Editor
 
         internal static string UpdateAvatar(GameObject avatar, string outputPath = null)
         {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new InvalidOperationException("Play Modeを停止してから更新してください。");
             if (avatar == null || EditorUtility.IsPersistent(avatar) || !avatar.scene.IsValid() ||
                 EditorSceneManager.IsPreviewScene(avatar.scene) ||
                 avatar.GetComponent<VRCAvatarDescriptor>() == null)

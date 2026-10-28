@@ -32,6 +32,19 @@ namespace Suu.MilfyFT.Tests
             catch (TargetInvocationException exception) { throw exception.InnerException; }
         }
         private Mesh Update(Mesh source) { var result = (Mesh)Call("CreateUpdatedMesh", source, _data); _objects.Add(result); return result; }
+        private Mesh CreateFtMesh()
+        {
+            var mesh = Object.Instantiate(_data.m_MeshDataList[0].m_OriginMesh);
+            _objects.Add(mesh);
+            foreach (var shape in _data.m_MeshDataList[0].BlendShapes)
+            {
+                if (shape.m_ShapeName == "EyeWideLeft" || shape.m_ShapeName == "EyeWideRight" ||
+                    mesh.GetBlendShapeIndex(shape.m_ShapeName) >= 0) continue;
+                foreach (var frame in shape.m_UnityBlendShapeData.m_Frames)
+                    frame.AddBlendShapeFrame(ref mesh, shape.m_ShapeName);
+            }
+            return mesh;
+        }
         private SkinnedMeshRenderer Body(Mesh mesh)
         {
             var root = new GameObject("Milfy update test"); _objects.Add(root); root.AddComponent<Animator>(); root.AddComponent(Type.GetType("VRC.SDK3.Avatars.Components.VRCAvatarDescriptor, VRCSDK3A", true));
@@ -73,7 +86,7 @@ namespace Suu.MilfyFT.Tests
         [TestCase(false)][TestCase(true)]
         public void MigrationPreservesOriginalShapesAndReplacesPreviewWide(bool existingWide)
         {
-            var source = Object.Instantiate(_data.m_MeshDataList[0].m_OriginMesh); _objects.Add(source);
+            var source = CreateFtMesh();
             if (existingWide) foreach (var side in new[] { "Left", "Right" })
                 source.AddBlendShapeFrame("EyeWide" + side, 100, Enumerable.Repeat(Vector3.up, source.vertexCount).ToArray(), null, null);
             var count = source.blendShapeCount; var result = Update(source);
@@ -106,7 +119,7 @@ namespace Suu.MilfyFT.Tests
         }
         [Test] public void MigrationPreservesWeightsAndUndoRestoresOriginalMesh()
         {
-            var source = _data.m_MeshDataList[0].m_OriginMesh; var body = Body(source); body.SetBlendShapeWeight(0, 37);
+            var source = CreateFtMesh(); var body = Body(source); body.SetBlendShapeWeight(0, 37);
             var path = OutputPath(); Undo.IncrementCurrentGroup(); Call("UpdateAvatar", body.transform.parent.gameObject, path); Undo.FlushUndoRecordObjects();
             Assert.That(body.sharedMesh, Is.Not.SameAs(source)); Assert.That(body.GetBlendShapeWeight(0), Is.EqualTo(37));
             Undo.PerformUndo(); Assert.That(body.sharedMesh, Is.SameAs(source)); Assert.That(body.GetBlendShapeWeight(0), Is.EqualTo(37));
@@ -114,7 +127,7 @@ namespace Suu.MilfyFT.Tests
         }
         [Test] public void ActivePreviewCorrectionIsRejectedWithoutAssignment()
         {
-            var source = Object.Instantiate(_data.m_MeshDataList[0].m_OriginMesh); _objects.Add(source);
+            var source = CreateFtMesh();
             source.AddBlendShapeFrame("MilfyEyeWideIrisLeft", 100, Enumerable.Repeat(Vector3.up, source.vertexCount).ToArray(), null, null);
             var body = Body(source); body.SetBlendShapeWeight(source.GetBlendShapeIndex("MilfyEyeWideIrisLeft"), 10);
             Assert.Throws<InvalidOperationException>(() => Call("UpdateAvatar", body.transform.parent.gameObject, OutputPath()));
@@ -133,7 +146,7 @@ namespace Suu.MilfyFT.Tests
         }
         [Test] public void ExistingSixShapesDoNotAccumulateAndAllEightRelease()
         {
-            var mesh = Update(_data.m_MeshDataList[0].m_OriginMesh); var body = Body(mesh);
+            var mesh = Update(CreateFtMesh()); var body = Body(mesh);
             var adapter = AssetDatabase.LoadAssetAtPath<AnimatorController>("Packages/jp.suu.milfy-ft/Runtime/Animators/Milfy_FT_ShapeAdapter.controller");
             var inputs = new[] { "BrowExpressionLeft", "BrowExpressionRight", "SmileFrownLeft", "SmileFrownRight", "MouthLowerDown" };
             var targets = new[] { "BrowInnerUpLeft", "BrowInnerUpRight", "MouthSadLeft", "MouthSadRight", "MouthLowerDownLeft" };
@@ -162,7 +175,7 @@ namespace Suu.MilfyFT.Tests
         [TestCase("Left")][TestCase("Right")]
         public void ExistingAdapterMatchesJerry2DAndExplicitlyReleasesTracking(string side)
         {
-            var mesh = Update(_data.m_MeshDataList[0].m_OriginMesh); var actual = Body(mesh); var expected = Body(mesh);
+            var mesh = Update(CreateFtMesh()); var actual = Body(mesh); var expected = Body(mesh);
             var adapter = AssetDatabase.LoadAssetAtPath<AnimatorController>("Packages/jp.suu.milfy-ft/Runtime/Animators/Milfy_FT_ShapeAdapter.controller");
             Assert.That(adapter.layers.Length, Is.EqualTo(2));
             var vendor = "Packages/adjerry91.vrcft.templates/Animators/Unified Expressions Blendshapes/FX - Face Tracking - UE Blendshapes.controller";

@@ -60,7 +60,7 @@ Jerry's Templates 7.0.5のまぶた入力を使用します。目細め入力が
 
 現在のMeshを複製し、配布データの `EyeWideLeft/Right` を追加または置換します。元Mesh、その他の形状、rendererの設定値を保持します。更新前からEyeWideがある場合も新しい合成形状へ更新されます。Sceneは自動保存せず、Undoで割当を戻せます。生成したMeshアセットはUndo後も残ります。
 
-Prefab ModeとPreview Sceneは更新対象外です。試用版の `MilfyEyeWidePupil*` / `MilfyEyeWideIris*` が非ゼロの場合は、二重変形を避けるため更新を止めます。0へ戻してから更新してください。これらの形状データは自動削除しません。
+Play Mode中・移行中、Prefab Mode、Preview Sceneは更新対象外です。試用版の `MilfyEyeWidePupil*` / `MilfyEyeWideIris*` が非ゼロの場合は、二重変形を避けるため更新を止めます。0へ戻してから更新してください。これらの形状データは自動削除しません。
 
 新規導入では通常のsetupを実行すれば41形状を生成します。手動運用では従来どおりBlendShareの `Create Meshes` を使用できます。
 
