@@ -14,7 +14,7 @@ This package does not include the original Milfy FBX, mesh, or textures. It incl
 - Version: 7.0.5
 - License: MIT
 
-`Milfy_FT.prefab` is based on the Modular Avatar Unified Expressions prefab from Jerry's Templates. This package depends on Jerry's Templates and adds a small Milfy-specific supplemental animator controller that consumes Jerry's smoothed proxy parameters.
+`Milfy_FT.prefab` is based on the Modular Avatar Unified Expressions prefab from Jerry's Templates. This package depends on Jerry's Templates and adds a small Milfy-specific supplemental animator controller that consumes Jerry's smoothed proxy parameters. Its EyeWide branches derive from Jerry 7.0.5's EyeLid-by-EyeSquint blend trees and eye animation curves, with explicit inactive resets.
 
 Required product-page credit:
 

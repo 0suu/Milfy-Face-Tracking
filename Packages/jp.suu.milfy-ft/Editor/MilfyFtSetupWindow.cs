@@ -766,10 +766,10 @@ namespace Suu.MilfyFT.Editor
                 blendShapeData.m_MeshDataList[0].m_ShapeNames;
 
             if (shapeNames == null ||
-                shapeNames.Count != 39 ||
-                shapeNames.Distinct().Count() != 39)
+                shapeNames.Count != 41 ||
+                shapeNames.Distinct().Count() != 41)
             {
-                message = "Milfy FT用BlendShareデータが39形状ではありません。パッケージを再導入してください。";
+                message = "Milfy FT用BlendShareデータが41形状ではありません。パッケージを再導入してください。";
                 return false;
             }
 

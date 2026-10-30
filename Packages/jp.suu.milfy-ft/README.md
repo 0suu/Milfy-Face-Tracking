@@ -15,7 +15,7 @@
 
 Jerry's Templates は互換性を保証するため 7.0.5 に固定しています。VRCFaceTracking 本体は PC 側で別途セットアップしてください。
 
-現在の動作確認環境は VRChat Avatars SDK 3.10.4、Modular Avatar 1.17.1、BlendShare 1.0.3、Jerry's Templates 7.0.5 です。依存範囲内の全バージョンを個別に検証したものではありません。
+現在の動作確認環境は VRChat Avatars SDK 3.10.4、Modular Avatar 1.18.1、BlendShare 1.0.3、Jerry's Templates 7.0.5 です。依存範囲内の全バージョンを個別に検証したものではありません。
 
 ## 導入方法
 
@@ -36,7 +36,23 @@ Jerry's Templates は互換性を保証するため 7.0.5 に固定していま�
 
 `OSCmooth` を別途導入する必要はありません。眼球回転用に生成済みの24アニメーションをこのパッケージへ収録しています。
 
-セットアップウィンドウは、未改変Milfyの `Body` を検証してから39個のFT用BlendShapeを持つ別Meshアセットを生成します。FBXや `Body` の頂点構成が違う場合は処理を開始しません。
+セットアップウィンドウは、未改変Milfyの `Body` を検証してから、配布BlendShareデータの41個のFT用BlendShapeを持つ別Meshアセットを生成します。元FBXと頂点構成が違う場合は処理を開始しません。
+
+## 目の見開き（1.2.0以降）
+
+`EyeWideLeft/Right` により、見開きに合わせて瞳孔・黒目・星型を含むハイライトが連続して縮小します。Jerry 7.0.5のまぶた入力を使い、追跡停止時は0へ戻ります。縮瞳は見開きと一体で、実測瞳孔入力とは連動しません。
+
+### 1.1.xからの更新
+
+以前生成したMeshはパッケージ更新だけでは変わりません。
+
+1. Play Modeを停止し、Hierarchy上のセットアップ済みアバタールートを選択します。
+2. `Tools/suu_MifyFT/Update selected FT mesh to 1.2.0` を実行します。
+3. 表情を確認してSceneを保存し、再ビルド・アップロードします。
+
+元Meshを残して複製し、EyeWideだけを追加・置換します。他の形状と設定値は保持し、Undoで割当を戻せます（生成Meshは残ります）。Prefab Modeでは実行できません。新規導入は通常のsetupを使用します。
+
+[frameeyeosc](https://github.com/sasaken1102r/frameeyeosc) はVRCFaceTrackingのLiveLinkまたはFrameEyeOSCモジュール経由で接続してください。ETVRモードでは見開きが伝わりません。
 
 ## 追加6形状
 
@@ -51,7 +67,7 @@ Jerry's Templates 7.0.5が標準では直接出力しない次の形状は、`Mi
 
 Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLowerDownLeft` と `MouthLowerDownRight` は同じ値で動きます。左右を独立させるにはFT構成全体の変更が必要です。
 
-`Milfy FT Shape Adapter` レイヤーが書き込むのは上記6形状だけです。Milfyに元からある `BrowInnerUp` などのBlendShapeは変更・固定しません。既存表情とFT表情の競合や合成は、このパッケージより上位の表情制御レイヤーで調整してください。
+`Milfy FT Shape Adapter` レイヤーが書き込むのは上記6形状と `EyeWideLeft/Right` の計8形状です。Milfyに元からある `BrowInnerUp` などのBlendShapeは変更・固定しません。既存表情とFT表情の競合や合成は、このパッケージより上位の表情制御レイヤーで調整してください。
 
 ## 設定メニュー
 
@@ -63,7 +79,7 @@ Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLow
 
 ## パラメーター容量
 
-`FT/Debug` と、Milfy FTの39形状に存在しない次の入力の量子化パラメーターは Local Only に設定しています。
+`FT/Debug` と、Milfy FTの41形状に存在しない次の入力の量子化パラメーターは Local Only に設定しています。
 
 - 瞳孔の拡縮
 - Lip Suck Upper / Lower
@@ -74,7 +90,7 @@ Jerry 7.0.5には左右別の `MouthLowerDown` 入力がないため、`MouthLow
 - Mouth Tightener Left / Right
 - 舌の左右・上下・Roll
 
-これらはJerry's Templates内で、Milfy FTの生成Meshに存在しないBlendShapeだけを駆動する入力です。対応する39形状の同期は維持しています。
+これらはJerry's Templates内で、Milfy FTの生成Meshに存在しないBlendShapeだけを駆動する入力です。対応する41形状の同期は維持しています。
 
 Milfy v1.5.0の初期Expression Parameters（99 bits）と合成した場合は **234 / 256 bits** です。対応形状の `TongueOut` は別パラメーターのためリモート同期を維持します。
 
